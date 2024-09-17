@@ -1,0 +1,16 @@
+---
+logdir: '/home/tj/landmark_recognition/data/training_logs/latest/'
+
+aid:      '/home/tj/data/AID/'
+aid_ltype: 'Pond'
+
+resisc45: '/home/tj/data/NWPU-RESISC45'
+resisc45_ltype: 'stadium'
+
+hirise:   '/home/tj/data/hirise_craters/'
+hirise_ltype: 'craters'
+
+lunar:    '/home/tj/data/blender/lunar_craters/'
+lunar_ltype: 'craters'
+lunar_trajPkl:   '/home/tj/landmark_recognition/data/traj_test_indices/traj1.pk'
+lro_traj_anno:   '/home/tj/data/blender/lro_trajs/stock/annotations.txt'

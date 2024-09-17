@@ -1,0 +1,13 @@
+2019-08-22 14:12:21,044 - netlog - INFO - ================================================
+2019-08-22 14:12:21,044 - netlog - INFO - Learning Rate: 1e-05
+2019-08-22 14:12:21,044 - netlog - INFO - Momentum: 0.9
+2019-08-22 14:12:21,044 - netlog - INFO - Regularization Weight Decay: 0
+2019-08-22 14:12:21,044 - netlog - INFO - Classifier: VGG_avg
+2019-08-22 14:12:21,044 - netlog - INFO - Dataset: ObjectPI
+2019-08-22 14:12:21,044 - netlog - INFO - Nbr of Epochs: 40
+2019-08-22 14:12:21,301 - netlog - INFO - Output classes: 25
+2019-08-22 14:12:21,301 - netlog - INFO - Input view: 8
+2019-08-22 14:12:28,601 - netlog - INFO - Start Training
+2019-08-22 14:12:28,602 - netlog - INFO - Start Testing for Best Model
+2019-08-22 14:12:28,603 - netlog - INFO - Loading model
+2019-08-22 14:12:39,629 - netlog - INFO - ==>>>test accuracy:0.6951530612244898

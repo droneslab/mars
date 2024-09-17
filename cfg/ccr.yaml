@@ -1,0 +1,7 @@
+---
+hirise_images: '/user/tbchase/projects/data/hirise_v3/map-proj-v3/'
+hirise_labels: '/user/tbchase/projects/data/hirise_v3/labels-map-proj-v3.txt'
+lunar_images: '/user/tbchase/projects/data/blender_lunar_craters/hirise_style/'
+lunar_trajPkl: '/user/tbchase/projects/landmark_recognition/data/traj_test_indices/traj1.pk'
+logdir: '/user/tbchase/projects/data/landmark_recognition/training_logs/'
+lro_traj_anno: '/user/tbchase/projects/data/blender/lro_trajs/stock/annotations.txt'

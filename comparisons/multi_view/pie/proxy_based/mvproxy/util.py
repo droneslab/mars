@@ -1,0 +1,257 @@
+import sys
+sys.path.append('/home/tj/projects/research/landmark_recognition/comparisons/multi_view/pie/proxy_based/mvproxy/')
+import torch.nn as nn
+import torch.nn.functional as F
+from torch.nn import init
+import torch
+from torchvision.models.alexnet import model_urls
+from torchvision.models.alexnet import model_urls as model_url_alexnet
+from torchvision.models.vgg import model_urls as model_url_vgg
+import torchvision.models as models
+import pickle
+from random import randint
+import random
+import numpy as np
+import time
+from PIL import Image
+from layers.resnext import ResNext
+from torchvision.io import read_image, ImageReadMode
+import glob
+
+
+def compute_acc(feat, class_feat, gt):
+    correct = 0.0
+    for i in range(feat.shape[0]):
+        f = feat[i].view(1,feat[i].shape[0]).repeat(class_feat.shape[0],1)
+        dist = torch.sum((f - class_feat)**2,1)
+        dist = dist.cpu().detach().numpy()
+        pred = np.argmin(dist)
+        if pred == gt[i]:
+            correct += 1.0
+    return correct
+
+class Multiview_obj:
+    def __init__(self, view_list, transform, num_of_view):
+        # number of views
+        self.V = num_of_view
+        self.transform = transform
+        # a list of views for a single object
+        self.views = self._load_views(view_list, num_of_view)
+       
+    def _load_views(self, view_list, V):
+        views = None
+        # This shuffles the view list?
+        sampled_view_list = np.random.choice(view_list, V, replace=False)
+        for f in sampled_view_list:
+            img = Image.open(f)
+            if self.transform is not None:
+                img = self.transform(img)
+             
+            img = img.unsqueeze(0)    
+            if views is None:
+                views = img
+            else:
+                views = torch.cat([views, img], 0)
+        # views has shape [batchsize, # of view , 3, 224, 224]
+        return views
+
+class mvDataset:
+    def __init__(self, data , max_view, transform = None, view_drop_out = False, sampled_view = None):
+        self.data = data
+        self.objs = data['objs']
+        self.labels = data['labels']
+        self.max_view = max_view
+        self.transform = transform
+        self.view_drop_out = view_drop_out
+        self.sampled_view = sampled_view
+
+    def __len__(self):
+        return len(self.objs)
+        
+    def __preprocess__(self, views_for_a_single_object, sampled_view):
+        s = Multiview_obj(views_for_a_single_object, self.transform, sampled_view)           
+        return s
+    
+    def __getitem__(self, idx):
+
+        objs_batch = self.objs[idx]
+        labels_batch = self.labels[idx]
+        if self.view_drop_out and self.sampled_view is None:
+            self.sampled_view = randint(1, self.max_view)
+        else: 
+            self.sampled_view = self.max_view
+                    
+        shape_object = self.__preprocess__(objs_batch, self.sampled_view) 
+        x = shape_object.views
+        y = labels_batch
+        return (x,y)
+    
+def get_instances(which='train'):
+    instances = []
+    img_paths = glob.glob('/home/tj/data/blender/lunar_craters/hirise_style/*.png')
+    for img_path in img_paths:
+        num = (img_path.split('/')[-1]).split('.png')[0]
+        if '_' in num:
+            num = num.split('_')[0]
+        instances.append((img_path,int(num)))
+    all_labels = np.unique([x[1] for x in instances])
+    # Gather test trajectory indices, and form train/val/test datasets
+    with open(f'/home/tj/projects/research/landmark_recognition/data/traj_test_indices/traj1.pk', 'rb') as f:
+        test_labels = np.unique(list(pickle.load(f)))
+    test_labels = [x for x in test_labels if x in all_labels] # Clean test labels since we cleaned up the dataset
+    train_instances = [x for x in instances if x[1] not in test_labels]
+    # 10% Validation split based on label
+    labels = np.unique([x[1] for x in train_instances])
+    labels = sorted(labels)
+    split = int(len(labels) * 0.1)
+    train_labels = labels[:-split]
+    val_labels = labels[-split:]
+    # Face losses require congruently increasing label numbers
+    train_true_labels = np.arange(len(train_labels))
+    train_label_map = dict(zip(train_labels, train_true_labels)) 
+    train_instances = [(x[0], train_label_map[x[1]]) for x in train_instances if x[1] in train_labels]
+    val_instances = [x for x in train_instances if x[1] in val_labels]
+    test_instances = [x for x in instances if x[1] in test_labels]
+    if which == 'train':
+        return train_instances
+    elif which == 'val':
+        return val_instances
+    else:
+        return test_instances
+    
+class mvDataset2:
+    def __init__(self, which, max_view, transform = None, view_drop_out = False, sampled_view = None):
+        self.instances = get_instances(which)
+        self.labels = [x[1] for x in self.instances]
+        self.num_craters = len(np.unique(self.labels))
+        self.max_view = max_view
+        self.transform = transform
+        self.view_drop_out = view_drop_out
+        self.sampled_view = sampled_view
+        
+    def get_all_instances(self, y):
+        paths = [p[0] for p in self.instances if p[1] == y]
+        batch = torch.zeros((7,3,224,224))
+        for i in range(len(paths)):
+            img = read_image(paths[i], mode=ImageReadMode.RGB).float()
+            img = self.transform(img)
+            batch[i,:] = img
+        return batch
+
+    def __len__(self):
+        return self.num_craters
+        
+    def __preprocess__(self, views_for_a_single_object, sampled_view):
+        s = Multiview_obj(views_for_a_single_object, self.transform, sampled_view)           
+        return s
+    
+    def __getitem__(self, idx):
+        y = idx
+        x = self.get_all_instances(y)
+        # if self.view_drop_out and self.sampled_view is None:
+        #     self.sampled_view = randint(1, self.max_view)
+        # else: 
+        #     self.sampled_view = self.max_view
+        
+        # shape_object = self.__preprocess__(imgs, self.sampled_view) 
+        # x = shape_object.views
+        # y = idx
+        return (x,y)
+
+def load_data(pickle_filename):
+
+    train = {}
+    train['objs'] = []
+    train['labels'] = []
+    test = {}
+    test['objs'] = []
+    test['labels'] = []
+    with open(pickle_filename, "rb") as input_file:
+        data = pickle.load(input_file)    
+    
+    for c in data['train']:
+        for obj in data['train'][c]:
+            train['objs'].append(data['train'][c][obj]['objs'])
+            train['labels'].append(data['train'][c][obj]['labels'])
+    for c in data['test']:
+        for obj in data['test'][c]:
+            test['objs'].append(data['test'][c][obj]['objs'])
+            test['labels'].append(data['test'][c][obj]['labels'])
+            
+    return train, test
+    
+class VGG_avg_mvproxy(nn.Module):
+    def __init__(self, input_view, output_class):
+        super(VGG_avg_mvproxy, self).__init__()
+        self.input_view = input_view
+        model_url_vgg['vgg16'] = model_url_vgg['vgg16'].replace('https://', 'http://')
+        VGG = models.vgg16(pretrained=True)
+        VGG.classifier._modules['6']= nn.Linear(4096, out_features=output_class)
+        
+        self.features = VGG.features
+        self.input_view = input_view
+        self.output_class = output_class                
+        self.classifier1 = nn.Sequential(*list(VGG.classifier)[0:5])
+        self.class_centers = nn.Parameter(torch.randn(1,1,self.output_class, 4096))
+
+    def forward(self, x):
+        # x: (n, self.view, 3, 224, 224)        
+        image_features = None
+        shape_feature = None
+        for view in range(self.input_view):
+            view_feature = self.features(x[:,view]).view(x.shape[0], 25088)            
+            view_feature = self.classifier1(view_feature).view(x.shape[0],1,4096)
+
+            if image_features is None:
+                image_features = view_feature
+            else:
+                image_features = torch.cat([image_features, view_feature],1)
+        
+        class_feature = F.normalize(self.class_centers, p=2, dim=3, eps=1e-12)
+        class_feature = class_feature.view(self.output_class,4096)
+        
+        shape_feature = torch.mean(image_features,1)
+        shape_feature = F.normalize(shape_feature, p=2, dim=1, eps=1e-12)
+        
+        return shape_feature, class_feature 
+
+class Resnext_avg_mvproxy(nn.Module):
+    def __init__(self, input_view, output_class):
+        super(Resnext_avg_mvproxy, self).__init__()
+        self.input_view = input_view
+        model_url_vgg['vgg16'] = model_url_vgg['vgg16'].replace('https://', 'http://')
+        VGG = models.vgg16(pretrained=True)
+        VGG.classifier._modules['6']= nn.Linear(4096, out_features=output_class)
+        
+        self.features = VGG.features
+        # self.features = ResNext(att_type='se')
+        self.input_view = input_view
+        self.output_class = output_class
+        self.classifier1 = nn.Sequential(*list(VGG.classifier)[0:5])
+        self.class_centers = nn.Parameter(torch.randn(1,1,self.output_class, 4096))
+        # self.class_centers = nn.Parameter(torch.randn(1,1,self.output_class, 512))
+
+    def forward(self, x):
+        # x: (n, self.view, 3, 224, 224)
+        image_features = None
+        shape_feature = None
+        for view in range(self.input_view):
+            view_feature = self.features(x[:,view]).view(x.shape[0], 25088)            
+            view_feature = self.classifier1(view_feature).view(x.shape[0],1,4096)
+            
+            # view_feature = self.features(x[:,view])
+            # view_feature = view_feature.view(x.shape[0],1,512)
+
+            if image_features is None:
+                image_features = view_feature
+            else:
+                image_features = torch.cat([image_features, view_feature],1)
+        
+        class_feature = F.normalize(self.class_centers, p=2, dim=3, eps=1e-12)
+        class_feature = class_feature.view(self.output_class,4096)
+        # class_feature = class_feature.view(self.output_class,512)
+        
+        shape_feature = torch.mean(image_features,1)
+        shape_feature = F.normalize(shape_feature, p=2, dim=1, eps=1e-12)
+        
+        return shape_feature, class_feature       
