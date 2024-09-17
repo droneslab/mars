@@ -88,6 +88,7 @@ class MetricLDN(pl.LightningModule):
                 return None
             
         self.log(f'{self.ml_loss_type}', ml_loss, prog_bar=True)
+        self.log(f'MARs', mars_loss, prog_bar=True)
     
         total_loss = ml_loss + mars_loss
                 

@@ -1,6 +1,6 @@
 import sys
 sys.path.append('../')
-from utils import load_config, KerasProgressBar
+from utils import load_config, rich_progress_bar
 import pytorch_lightning as pl
 from datasets.datamodule_factory import CommonDatamodule
 from model import MetricLDN
@@ -15,9 +15,7 @@ datamodule = CommonDatamodule(cfg['landmarks_dir'], cfg['exclude_indices'], batc
 model = MetricLDN(cfg, datamodule)
 
 # --- Setup training variables and callbacks
-callbacks=[
-    KerasProgressBar(),
-]
+callbacks=[rich_progress_bar()]
 if cfg['eval']:
     callbacks += [
         Eval_RecallAtKCallback([1], num_galleries=[1], gpu=True), # Recall@1
@@ -39,4 +37,4 @@ trainer = pl.Trainer(
     logger=True,
     log_every_n_steps=1,
 )
-trainer.fit(model, datamodule, ckpt_path=cfg['pretrained_weights'])
+trainer.fit(model, datamodule, ckpt_path=cfg['pretrained_weights'] if cfg['pretrained_weights'] else None)

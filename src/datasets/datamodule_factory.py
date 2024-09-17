@@ -31,7 +31,7 @@ class CommonDataset(Dataset):
         return F(img), lbl, T128,T32,T16,T8,T4
     
 class CommonDatamodule(pl.LightningDataModule):
-    def __init__(self, image_dir, exclude_idxs_pkl=None, nper_class=2, batch_size=32, num_workers=8, img_sz=128):
+    def __init__(self, image_dir, exclude_idxs_pkl='', nper_class=2, batch_size=32, num_workers=8, img_sz=128):
         super().__init__()
         self.batch_size = batch_size
         self.num_workers = num_workers
@@ -53,7 +53,7 @@ class CommonDatamodule(pl.LightningDataModule):
         split = len(all_labels)//2
                 
         test_labels = []
-        if exclude_idxs_pkl is not None:
+        if exclude_idxs_pkl:
             # Gather test trajectory indices for initial test labels
             with open(exclude_idxs_pkl, 'rb') as f:
                 test_labels = np.unique(list(pickle.load(f)))

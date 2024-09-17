@@ -1,14 +1,14 @@
 ---
 # ------ Training settings
-logging_dir: './data/training_logs/latest/'
+logging_dir: 'training_logs/'
 input_size: 128 # Input images are resized to this square HxW size
 batch_size: 32 # Training batch size
 epochs: 50 # Number of training epochs
 
 # ------ Dataset/weights paths
-landmarks_dir: 'path/to/directory/of/landmark/images/'
-exclude_indices: None # None or path to pickle array with landmark indices that should be in test set
-pretrained_weights: None # None or path to pretrained weights ckpt (for continued training)
+landmarks_dir: '/mnt/nas/data/hirise_craters/craters/'
+exclude_indices: '' # None or path to pickle array with landmark indices that should be in test set
+pretrained_weights: '' # None or path to pretrained weights ckpt (for continued training)
 
 # ------ Model settings
 mars_enabled: True

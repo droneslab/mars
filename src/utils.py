@@ -3,15 +3,7 @@ from pytorch_lightning.callbacks import RichProgressBar
 from pytorch_lightning.callbacks.progress.rich_progress import RichProgressBarTheme
 import pytorch_lightning as pl
 import matplotlib.pyplot as plt
-from kornia.enhance import add_weighted        
-import matplotlib
-import matplotlib.cm as cm
-import tensorflow as tf
-import argparse
 import torch
-from pytorch_grad_cam import EigenCAM
-from pytorch_grad_cam.utils.image import show_cam_on_image
-import torchvision.transforms.functional as F
 import numpy as np
 try:
     progbar = pl.callbacks.progress.ProgressBar
@@ -47,42 +39,6 @@ def rich_progress_bar():
         metrics="white",
     )
     return CustomRichProgressBar(theme=theme, leave=True)
-
-class KerasProgressBar(progbar):
-    def __init__(self):
-        super().__init__()  # don't forget this :)
-        self.enable = True
-
-    def get_metrics(self, trainer, model):
-        # don't show the version number
-        items = super().get_metrics(trainer, model)
-        items.pop("v_num", None)
-        return items
-
-    def on_train_start(self, trainer, pl_module):
-        super().on_train_start(trainer, pl_module)
-        pbar = tf.keras.utils.Progbar(trainer.num_training_batches)
-        self.keras_bar = pbar
-
-    def on_train_epoch_start(self, trainer, pl_module):
-        super().on_train_epoch_start(trainer, pl_module)
-        print(f'Epoch {trainer.current_epoch+1}/{trainer.max_epochs}')
-
-    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
-        super().on_train_batch_end(trainer, pl_module, outputs, batch, batch_idx)
-        metrics = self.get_metrics(trainer, pl_module)
-        output = [(k,  float(metrics[k])) for k in metrics]
-        self.keras_bar.update(batch_idx + 1, values=output)
-    
-    def on_test_start(self, trainer, pl_module):
-        super().on_test_start(trainer, pl_module)
-        pbar = tf.keras.utils.Progbar(trainer.num_test_batches[0])
-        self.keras_bar = pbar
-        print('Test 1/1')
-    
-    def on_test_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
-        super().on_test_batch_end(trainer, pl_module, outputs, batch, batch_idx, dataloader_idx)
-        self.keras_bar.update(batch_idx + 1)
 
 def show_image(tensor):
     plt.figure()
@@ -168,51 +124,3 @@ def non_max_suppression_fast(boxes, overlapThresh):
 #   batch dim must be 0
 def untransform(xs, T_normals):    
     return torch.stack([T_normals[i](xs[i,...]) for i in range(xs.shape[0])])
-
-def showAtts(xs, atts, T128s, TAtts):
-    l1 = torch.nn.L1Loss(reduction='none')
-    last_maps = torch.mean(atts[:,-1,...], dim=1, keepdim=True)
-    
-    # Untransform atts and images
-    imgs_normal = untransform(xs, T128s)
-    atts_normal = untransform(last_maps, TAtts)
-    atts_normal_resized = F.resize(atts_normal, [xs.shape[-1]], antialias=True)
-        
-    p1 = torch.arange(0,imgs_normal.shape[0],2)
-    p2 = torch.arange(1,imgs_normal.shape[0],2)    
-    maes = l1(atts_normal_resized[p1,...], atts_normal_resized[p2,...]).mean(dim=-2).mean(dim=-1)
-    
-    heatmaps = []
-    for i in range(imgs_normal.shape[0]):
-        img = imgs_normal[i,:]
-        att = atts_normal_resized[i,:].permute(1, 2, 0).cpu().detach().numpy()
-        norm = matplotlib.colors.Normalize(vmin=att.min().item(), vmax=att.max().item())
-        heat = torch.Tensor(cm.jet(norm(np.squeeze(att)))[:,:,:3]).permute(2,0,1)
-        vis = add_weighted(img.cuda(), 0.5, heat.cuda(), 0.5, 0.)
-        heatmaps.append(vis)
-        
-    return heatmaps, maes
-
-def showCams(model, xs, T_normals, target, cuda=True):
-    l1 = torch.nn.L1Loss(reduction='none')
-    target_layers = [target]
-    gc = EigenCAM(model=model, target_layers=target_layers, use_cuda=cuda)
-    cams = gc(input_tensor=xs, aug_smooth=True, eigen_smooth=True)
-    cams = torch.tensor(cams).unsqueeze(1)
-    
-    # Untransform atts and images
-    imgs_normal = untransform(xs, T_normals)
-    cams_normal = untransform(cams, T_normals)
-        
-    p1 = torch.arange(0,cams_normal.shape[0],2)
-    p2 = torch.arange(1,cams_normal.shape[0],2)
-    maes = l1(cams_normal[p1,...], cams_normal[p2,...]).mean(dim=-2).mean(dim=-1)
-    
-    heatmaps = []
-    for i in range(imgs_normal.shape[0]):
-        vis = show_cam_on_image(imgs_normal[i,:].permute(1, 2, 0).cpu().detach().numpy(),
-                                cams_normal[i,:].permute(1, 2, 0).cpu().detach().numpy(),
-                                use_rgb=True)
-        heatmaps.append(torch.from_numpy(vis).permute(2,0,1))
-        
-    return heatmaps, maes
