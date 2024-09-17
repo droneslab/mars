@@ -1,6 +1,5 @@
 import torch
 import torchvision.transforms.functional as TF
-from utils import show_image_gray
 from torchvision import transforms
 from functools import partial
 

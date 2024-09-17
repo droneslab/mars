@@ -1,7 +1,6 @@
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import Callback
 from pytorch_metric_learning.utils.accuracy_calculator import AccuracyCalculator
-from pytorch_metric_learning.utils.inference import FaissKNN, InferenceModel
 from pytorch_metric_learning import testers
 import torch
 torch.set_printoptions(sci_mode=False)
@@ -17,12 +16,10 @@ from kornia.enhance import add_weighted
 import matplotlib
 import matplotlib.cm as cm
 # plt.switch_backend('agg')
-import faiss
 from pytorch_lightning.callbacks import ModelCheckpoint
-from utils import showCams, show_image_gray, showAtts, untransform, show_images_gray
+from utils import showCams, showAtts, untransform
 import wandb
 import torchvision as tv
-import torch.nn.functional as F
 from pytorch_grad_cam.utils.image import show_cam_on_image
 from torchvision.io import read_image, ImageReadMode
 from torchvision import transforms

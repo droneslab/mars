@@ -1,14 +1,7 @@
 from __future__ import print_function, division, absolute_import
-from collections import OrderedDict
-import math
 import torch.nn as nn
 import pytorch_lightning as pl
 import torch
-import torch.nn.functional as F
-import numpy as np
-import torch
-from torch.autograd import Function
-import torchvision
 
 ''' ======================================
         Pixel-wise Top-k Attention Pooling

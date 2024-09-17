@@ -9,10 +9,9 @@ import matplotlib.cm as cm
 import tensorflow as tf
 import argparse
 import torch
-from pytorch_grad_cam import GradCAM, HiResCAM, ScoreCAM, GradCAMPlusPlus, AblationCAM, XGradCAM, EigenCAM, FullGrad
+from pytorch_grad_cam import EigenCAM
 from pytorch_grad_cam.utils.image import show_cam_on_image
 import torchvision.transforms.functional as F
-import torchvision as tv
 import numpy as np
 try:
     progbar = pl.callbacks.progress.ProgressBar
@@ -217,28 +216,3 @@ def showCams(model, xs, T_normals, target, cuda=True):
         heatmaps.append(torch.from_numpy(vis).permute(2,0,1))
         
     return heatmaps, maes
-  
-def getInputArguments(argv):
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--cfg', type=str, default='../cfg/laptop.yaml', help='Config file to use for training')
-    parser.add_argument('--epochs', type=int, default=50, help='Epochs')
-    parser.add_argument('--batch_size', type=int, default=16, help='Batch size')
-    parser.add_argument('--save', default=False, action=argparse.BooleanOptionalAction)
-    parser.add_argument('--ckpt_path', type=str, default='', help='Path to model checkpoint, for continued training')
-    parser.add_argument('--nologger', default=False, action=argparse.BooleanOptionalAction)
-    
-    
-    parser.add_argument('--dataset', type=str, default='hirise', 
-                        help='Dataset used for training/testing: [hirise | lunar | aid | resisc45]')
-
-    parser.add_argument('--conv_type', type=str, default='conv', required=False, 
-                                help='Convolution layer to use with ResNext')
-    parser.add_argument('--att_type', type=str, default='se', required=False, 
-                                help='Attention layer to use with ResNext')
-    parser.add_argument('--ml_loss', type=str, default='contrastive', required=False, 
-                                help='Metric Learning loss')
-    parser.add_argument('--aar', default=False, action=argparse.BooleanOptionalAction)
-    parser.add_argument('--ch_gamma', type=float, default=0.15, help='AAR Channel Alignment Gamma')
-    parser.add_argument('--sp_gamma', type=float, default=0.15, help='AAR Spatial Alignment Gamma')
-    args = parser.parse_args()
-    return args

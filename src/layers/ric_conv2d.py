@@ -1,16 +1,8 @@
 from __future__ import print_function, division, absolute_import
-from collections import OrderedDict
 import math
-import torch.nn as nn
 import pytorch_lightning as pl
 import torch
-import torch.nn.functional as F
-import numpy as np
-import torch
-from torch.autograd import Function
 import torchvision
-from layers.attention.cbam import CBAM
-from layers.attention.se import SEModule
 
 # DeformableConv2d class: https://github.com/yjh0410/PyTorch_DCNv2/blob/main/DCN/dcnv2.py
 class RICConv2d(pl.LightningModule):

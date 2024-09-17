@@ -1,22 +1,16 @@
 import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision.io import read_image, ImageReadMode
-from torchvision import transforms
 import pytorch_lightning as pl
 import numpy as np
 from glob import glob
 import torchvision.transforms.functional as TF
 import pickle
 from datasets.transforms import get_transform, normalize_image
-from utils import show_image_gray
-from torchvision import transforms
-from functools import partial
-import math
 from datasets.sampler import CustomMPerClassSampler
 
 class CommonDataset(Dataset):
-    def __init__(self, name, instances, transform_type='none', img_sz=128):
-        self.name = name
+    def __init__(self, instances, transform_type='none', img_sz=128):
         self.instances = instances
         self.labels = [x[1] for x in self.instances]
         self.num_classes = len(np.unique(self.labels))
@@ -25,9 +19,6 @@ class CommonDataset(Dataset):
         
     def __len__(self):
         return len(self.instances)
-    
-    def __str__(self):
-        return f"{self.name}_dataset"
     
     def __getitem__(self, idx):
         path, lbl = self.instances[idx]
@@ -40,15 +31,14 @@ class CommonDataset(Dataset):
         return F(img), lbl, T128,T32,T16,T8,T4
     
 class CommonDatamodule(pl.LightningDataModule):
-    def __init__(self, name, image_dir, landmark_type, test_pkl=None, nper_class=2, batch_size=32, num_workers=8, img_sz=128):
+    def __init__(self, image_dir, exclude_idxs_pkl=None, nper_class=2, batch_size=32, num_workers=8, img_sz=128):
         super().__init__()
-        self.name = name
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.nper_class = nper_class
         
         instances = []
-        img_paths = sorted(glob(f'{image_dir}/{landmark_type}/*'))
+        img_paths = sorted(glob(f'{image_dir}/*'))
         for img_path in img_paths:
             num = (img_path.split('/')[-1]).split('.')[0]
             if '_' in num:
@@ -63,9 +53,9 @@ class CommonDatamodule(pl.LightningDataModule):
         split = len(all_labels)//2
                 
         test_labels = []
-        if test_pkl is not None:
+        if exclude_idxs_pkl is not None:
             # Gather test trajectory indices for initial test labels
-            with open(test_pkl, 'rb') as f:
+            with open(exclude_idxs_pkl, 'rb') as f:
                 test_labels = np.unique(list(pickle.load(f)))
                 test_labels = [x for x in test_labels if x in all_labels] # Clean test labels since we cleaned up the dataset
             
@@ -76,11 +66,10 @@ class CommonDatamodule(pl.LightningDataModule):
         self.train_instances = [x for x in instances if x[1] in train_labels]
         self.test_instances  = [x for x in instances if x[1] in test_labels]
         
-        print(f'\n{self.name} splits ({landmark_type}):')
         print(f'Train: {len(train_labels)}, Test: {len(test_labels)}')
         
-        self.train_dataset = CommonDataset(self.name, self.train_instances, transform_type='all', img_sz=img_sz)
-        self.test_dataset  = CommonDataset(self.name, self.test_instances,  transform_type='all', img_sz=img_sz)
+        self.train_dataset = CommonDataset(self.train_instances, transform_type='all', img_sz=img_sz)
+        self.test_dataset  = CommonDataset(self.test_instances,  transform_type='all', img_sz=img_sz)
 
         self.test_batch_size = 10 # emulates how many landmarks are detected per frame
         

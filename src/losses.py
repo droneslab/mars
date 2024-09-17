@@ -2,33 +2,19 @@ import torch
 from torch.nn import init
 import numpy as np
 import math
-from pytorch_metric_learning.losses import BaseMetricLossFunction, GenericPairLoss, ContrastiveLoss, TripletMarginLoss
+from pytorch_metric_learning.losses import GenericPairLoss
 from pytorch_metric_learning.utils import loss_and_miner_utils as lmu
 from pytorch_metric_learning.utils import common_functions as c_f
-from pytorch_metric_learning.distances import LpDistance, CosineSimilarity
+from pytorch_metric_learning.distances import CosineSimilarity
 import pytorch_metric_learning.losses as pml_losses
 import pytorch_lightning as pl
-import torchvision as tv
 import torch.nn.functional as F
 from torch import nn
-from torch.nn import Parameter
-from utils import show_images, untransform, show_image
-from os.path import abspath
-# import sys
-# sys.path.append(abspath('../comparisons/matching/'))
-# sys.path.append(abspath('../comparisons/remote_sensing/pairloss/'))
-# sys.path.append(abspath('../comparisons/remote_sensing/ride/'))
-# from matchnet import MetricNetLoss
-# from pairwise_loss import PairLoss
-# from ride_loss import RiDeLoss
-from layers.projector import gem, GeM
-from layers.attention.cbam import ChannelPool
-from layers.projector import EmbeddingProjector
-from layers.pyramid_pool import SpatialPyramidPooling
-import torchvision.transforms.functional as TFV
+from utils import untransform
+from layers.projector import GeM
 
 
-class AttentionAlignmentRegularization(pl.LightningModule):
+class MARs(pl.LightningModule):
     def __init__(self, in_channels, ch_gamma, sp_gamma):
         super().__init__()
         self.c_gam = ch_gamma
@@ -314,8 +300,6 @@ def get_ml_loss(loss, num_classes, train_ds):
     ml_func, requires_opt = ml_losses[loss]
     if loss in ['softtriple', 'proxyanchor', 'proxynca++', 'subcenterarcface', 'synproxy']:
         initalized_func = ml_func(num_classes=num_classes, embedding_size=512)
-    elif loss == 'ride':
-        initalized_func = ml_func(train_ds)
     else:
         initalized_func = ml_func()
     

@@ -1,8 +1,6 @@
 '''
 Source: https://github.com/revidee/pytorch-pyramid-pooling/blob/master/pyramidpooling.py
 '''
-
-
 import math
 import torch
 import torch.nn as nn

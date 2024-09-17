@@ -1,7 +1,6 @@
 import sys
 sys.path.append('../')
-from utils import load_config, non_max_suppression_fast, show_image_gray, show_images_gray
-from model import MetricLDN
+from utils import non_max_suppression_fast
 import numpy as np
 import torch
 from alive_progress import alive_bar
@@ -10,13 +9,6 @@ from torchvision import transforms
 from matcher import FaissMatcher
 import faiss
 import torch.nn.functional as F
-import wandb
-from pathlib import Path
-import argparse
-import torchvision as tv
-from pytorch_grad_cam.utils.image import show_cam_on_image
-from pytorch_grad_cam import EigenCAM
-import matplotlib.pyplot as plt
 
         
 # Inference matching experiment over a dataset, records accuracy metrics and such

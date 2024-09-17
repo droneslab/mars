@@ -11,15 +11,8 @@ import math
 import torch.nn as nn
 import pytorch_lightning as pl
 import torch
-import torch.nn.functional as F
-import numpy as np
-import torch
-from torch.autograd import Function
-import torchvision
-from .attention.cbam import CBAM
 from .attention.se import SEModule
 from .attention.ca import CoordAtt
-from .deformable_conv2d import DeformableConv2d
 from .ric_conv2d import RICConv2d
 from .bottlenecks import Bottleneck
 
@@ -250,13 +243,10 @@ class ResNeXt101(pl.LightningModule):
 def create_resnext101(conv_type, att_type):
     conv_types = {
         'conv': nn.Conv2d,
-        # 'deform': torchvision.ops.DeformConv2d,
-        'deform': DeformableConv2d,
         'ric': RICConv2d
     }
     att_types = {
         'se': SEModule,
-        'cbam': CBAM,
         'ca': CoordAtt
     }
     ctype = conv_types[conv_type]

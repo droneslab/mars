@@ -1,6 +1,5 @@
 import torch
 from torch.utils.data.sampler import Sampler
-from pytorch_metric_learning.utils import common_functions as c_f
 import math
 import numpy as np
 
