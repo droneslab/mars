@@ -4,7 +4,7 @@
 Repository for the ECCV 2024 paper title MARs: Multi-view Attention Regularizations for Patch-based Feature Recognition of Space Terrain.
 
 MARs is a mechanism for aligning the attention information between multi-view patch-based features in metric learning-based descriptor networks:
-![](https://droneslab.github.io/mars/static/images/q2.png)
+<img src='imgs/mars.png'/>
 
 Please check out the project page for more details.
 
