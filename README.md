@@ -1,12 +1,12 @@
 # MARs: Multi-view Attention Regularizations
 ### [Project Page](https://droneslab.github.io/mars/) | [Paper (Coming Soon)]() | [Luna-1 Dataset](https://github.com/droneslab/Luna-1/)
 
-Repository for the ECCV 2024 paper title MARs: Multi-view Attention Regularizations for Patch-based Feature Recognition of Space Terrain.
+Repository for the ECCV 2024 paper titled ***MARs: Multi-view Attention Regularizations for Patch-based Feature Recognition of Space Terrain***.
 
-MARs is a mechanism for aligning the attention information between multi-view patch-based features in metric learning descriptor networks for improved recognition and re-identification accuracy:
+MARs is a mechanism for aligning the attention information between multi-view patch-based features in metric learning descriptor networks, improving recognition and re-identification accuracy:
 <img src='imgs/mars.png'/>
 
-Please check out the project page for more details.
+Please check out the project page/paper for more details.
 
 ## Installation
 Install the required Python packages:
