@@ -1,5 +1,5 @@
 # MARs: Multi-view Attention Regularizations
-### [Project Page](https://droneslab.github.io/mars/) | [Paper (Coming Soon)]() | [Luna-1 Dataset](https://github.com/droneslab/Luna-1/)
+### [Project Page](https://droneslab.github.io/mars/) | [Paper](https://www.ecva.net/papers/eccv_2024/papers_ECCV/papers/08092.pdf) | [Supplementary](https://www.ecva.net/papers/eccv_2024/papers_ECCV/papers/08092-supp.pdf) | [Luna-1 Dataset](https://github.com/droneslab/Luna-1/)
 
 Repository for the ECCV 2024 paper titled ***MARs: Multi-view Attention Regularizations for Patch-based Feature Recognition of Space Terrain***.
 
