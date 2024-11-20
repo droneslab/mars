@@ -166,7 +166,7 @@
         <h2 class="title is-3">Abstract</h2>
         <div class="content has-text-justified">
           <p>
-            The visual detection and tracking of surface terrain is required for spacecraft to safely land on or navigate within close proximity to celestial objects. Current approaches rely on template matching with pre-gathered patch-based features, which are expensive to obtain and a limiting factor in perceptual capability. While recent literature has focused on in-situ detection methods to enhance navigation and operational autonomy, robust description is still needed. In this work, we explore metric learning as the lightweight feature description mechanism and find that current solutions fail to address inter-class similarity and multi-view observational geometry. We attribute this to the view-unaware attention mechanism and introduce Multi-view Attention Regularizations (MARs) to constrain the channel and spatial attention across multiple feature views, regularizing the what and where of attention focus. We thoroughly analyze many modern metric learning losses with and without MARs and demonstrate improved terrainfeature recognition performance by upwards of 85%. We additionally introduce the Luna-1 dataset, consisting of Moon crater landmarks and reference navigation frames from NASA mission data to support future research in this difficult task.
+            The visual detection and tracking of surface terrain is required for spacecraft to safely land on or navigate within close proximity to celestial objects. Current approaches rely on template matching with pre-gathered patch-based features, which are expensive to obtain and a limiting factor in perceptual capability. While recent literature has focused on in-situ detection methods to enhance navigation and operational autonomy, robust description is still needed. In this work, we explore metric learning as the lightweight feature description mechanism and find that current solutions fail to address inter-class similarity and multi-view observational geometry. We attribute this to the view-unaware attention mechanism and introduce Multi-view Attention Regularizations (MARs) to constrain the channel and spatial attention across multiple feature views, regularizing the what and where of attention focus. We thoroughly analyze many modern metric learning losses with and without MARs and demonstrate improved terrain-feature recognition performance by upwards of 85%. We additionally introduce the Luna-1 dataset, consisting of Moon crater landmarks and reference navigation frames from NASA mission data to support future research in this difficult task.
           </p>
         </div>
       </div>
@@ -213,7 +213,7 @@
             <!-- MARs formulates an attention-alignment objective between feature views for improved downstream recognition performance,
             through the concept of height and width-disparate attention similarity spaces. -->
 
-            MARs embeds attention information into height and width-disparate similarty spaces, driving the <strong><em>what</em></strong>
+            MARs embeds attention information into height and width-disparate similarity spaces, driving the <strong><em>what</em></strong>
             and <strong><em>where</em></strong> of multi-view attention focus together while avoiding the trivial solution (e.g., both 
             attention maps are zero everywhere).
           </p>
@@ -260,7 +260,7 @@
       <div class="column"><h2 class="title is-3">Results</h2>
         <div class="content has-text-centered">
           <h6>
-            MARs leads to improved attention alignment comapared with rotational equivarant and spatial attention layers (RIC CA):
+            MARs leads to improved attention alignment compared with rotational equivariant and spatial attention layers (RIC CA):
           </h6>
           <img style="width:100%;" src="static/images/q1.png">
           
@@ -276,7 +276,7 @@
 
           <h6>
             During training, MARs (bottom) leads to greater stability and faster, more uniform convergence against 
-            rotational equivarant and spatial attention layers (RIC CA, top):
+            rotational equivariant and spatial attention layers (RIC CA, top):
           </h6>
           <img style="width:100%;" src="static/images/q4.png">
         </div>
@@ -303,7 +303,7 @@
               <source src="static/videos/earth.mp4" type="video/mp4">
             </video>
             <h6>
-              Attention alignment evolution during training for MARs (bottom row) against rotational equivarant and spatial attention layers (RIC CA, top row)
+              Attention alignment evolution during training for MARs (bottom row) against rotational equivariant and spatial attention layers (RIC CA, top row)
               for Mars Crater (left), Moon Crater (middle), and Earth Stadium (right) features.
             </h6>
         </div>
